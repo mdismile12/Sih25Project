@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Verification Tool</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { background: #2c3e50; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .tests { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .test-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .test-card h3 { margin-bottom: 10px; color: #2c3e50; }
+        button { background: #3498db; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; margin-bottom: 10px; }
+        button:hover { background: #2980b9; }
+        button.danger { background: #e74c3c; }
+        button.danger:hover { background: #c0392b; }
+        .result { background: #f9f9f9; padding: 10px; margin-top: 10px; border-left: 4px solid #3498db; border-radius: 4px; font-size: 12px; font-family: monospace; max-height: 300px; overflow-y: auto; }
+        .result.success { border-left-color: #27ae60; background: #d5f4e6; }
+        .result.error { border-left-color: #e74c3c; background: #fadbd8; }
+        .status { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-top: 10px; }
+        .status.ok { background: #27ae60; color: white; }
+        .status.error { background: #e74c3c; color: white; }
+        .status.warning { background: #f39c12; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 API Verification Tool</h1>
+            <p>Test all APIs and verify database connectivity</p>
+        </div>
+
+        <div class="tests">
+            <!-- Test 1: Medicines API -->
+            <div class="test-card">
+                <h3>1️⃣ Medicines API</h3>
+                <p>Check if medicines are loading correctly</p>
+                <button onclick="testMedicinesAPI()">Test Medicines</button>
+                <div id="medicines-result" class="result" style="display:none;"></div>
+            </div>
+
+            <!-- Test 2: Farms API -->
+            <div class="test-card">
+                <h3>2️⃣ Farms API</h3>
+                <p>Check if farms are available</p>
+                <button onclick="testFarmsAPI()">Test Farms</button>
+                <div id="farms-result" class="result" style="display:none;"></div>
+            </div>
+
+            <!-- Test 3: Database Status -->
+            <div class="test-card">
+                <h3>3️⃣ Database Status</h3>
+                <p>Verify database tables and columns</p>
+                <button onclick="checkDatabaseStatus()">Check Database</button>
+                <div id="db-result" class="result" style="display:none;"></div>
+            </div>
+
+            <!-- Test 4: Create Prescription -->
+            <div class="test-card">
+                <h3>4️⃣ Create Test Prescription</h3>
+                <p>Test full prescription creation flow</p>
+                <button onclick="testPrescriptionCreation()">Create Test Prescription</button>
+                <div id="prescription-result" class="result" style="display:none;"></div>
+            </div>
+
+            <!-- Test 5: Retrieve Prescriptions -->
+            <div class="test-card">
+                <h3>5️⃣ Retrieve Prescriptions</h3>
+                <p>Check stored prescriptions</p>
+                <button onclick="testGetPrescriptions()">Get Prescriptions</button>
+                <div id="get-presc-result" class="result" style="display:none;"></div>
+            </div>
+
+            <!-- Test 6: Fix Database -->
+            <div class="test-card">
+                <h3>⚙️ Fix Database</h3>
+                <p>Run database migration to add missing columns</p>
+                <button class="danger" onclick="runDatabaseFix()">Run Fix Now</button>
+                <div id="fix-result" class="result" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = "http://localhost/update_after_mentoring_1/api";
+
+        function showResult(elementId, data, isError = false) {
+            const el = document.getElementById(elementId);
+            el.style.display = 'block';
+            el.className = 'result ' + (isError ? 'error' : 'success');
+            el.innerHTML = `<pre>${typeof data === 'string' ? data : JSON.stringify(data, null, 2)}</pre>`;
+        }
+
+        async function testMedicinesAPI() {
+            const resultEl = document.getElementById("medicines-result");
+            resultEl.style.display = 'block';
+            resultEl.className = 'result';
+            resultEl.innerHTML = '⏳ Testing...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/medicines.php`);
+                const text = await response.text();
+                
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    return showResult("medicines-result", `Error parsing JSON:\n${text.substring(0, 500)}`, true);
+                }
+
+                if (Array.isArray(data) && data.length > 0) {
+                    const summary = `✅ Found ${data.length} medicines\n\nFirst medicine:\n${JSON.stringify(data[0], null, 2)}`;
+                    return showResult("medicines-result", summary, false);
+                } else {
+                    return showResult("medicines-result", `Response: ${JSON.stringify(data)}`, !data);
+                }
+            } catch (error) {
+                return showResult("medicines-result", `Error: ${error.message}`, true);
+            }
+        }
+
+        async function testFarmsAPI() {
+            const resultEl = document.getElementById("farms-result");
+            resultEl.style.display = 'block';
+            resultEl.className = 'result';
+            resultEl.innerHTML = '⏳ Testing...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/farms_list.php`);
+                const text = await response.text();
+                
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    return showResult("farms-result", `Error parsing JSON:\n${text.substring(0, 500)}`, true);
+                }
+
+                if (data.success && data.data && data.data.length > 0) {
+                    const summary = `✅ Found ${data.data.length} farms\n\nFirst farm:\n${JSON.stringify(data.data[0], null, 2)}`;
+                    return showResult("farms-result", summary, false);
+                } else {
+                    return showResult("farms-result", `Response: ${JSON.stringify(data)}`, !data.success);
+                }
+            } catch (error) {
+                return showResult("farms-result", `Error: ${error.message}`, true);
+            }
+        }
+
+        async function checkDatabaseStatus() {
+            const resultEl = document.getElementById("db-result");
+            resultEl.style.display = 'block';
+            resultEl.className = 'result';
+            resultEl.innerHTML = '⏳ Checking database...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/fix_database.php`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const summary = `✅ Database check successful\n\nPrescriptions table: ${data.prescriptions_columns} columns\nPrescription_items table: ${data.items_columns} columns\n\nLog:\n${data.log.join('\n')}`;
+                    return showResult("db-result", summary, false);
+                } else {
+                    return showResult("db-result", `Error: ${data.message}\n\n${data.log.join('\n')}`, true);
+                }
+            } catch (error) {
+                return showResult("db-result", `Error: ${error.message}`, true);
+            }
+        }
+
+        async function testPrescriptionCreation() {
+            const resultEl = document.getElementById("prescription-result");
+            resultEl.style.display = 'block';
+            resultEl.className = 'result';
+            resultEl.innerHTML = '⏳ Creating test prescription...';
+
+            try {
+                const payload = {
+                    farm_id: "FARM-001",
+                    animal_id: "TEST-" + Date.now(),
+                    animal_type: "Cattle",
+                    animal_weight: 450,
+                    animal_owner: "Test Farmer",
+                    symptoms: "Test Symptoms",
+                    diagnosis: "Test Diagnosis",
+                    vet_id: "VET001",
+                    administration_frequency: "2x daily",
+                    administration_time: "Morning, Evening",
+                    duration_days: 7,
+                    medicines: [
+                        {
+                            medicine_id: "MED-001",
+                            dosage_rate: 15,
+                            frequency: "2x daily",
+                            calculated_dosage: 6750,
+                            dosage_unit: "mg",
+                            duration_days: 7,
+                            notes: "Test medicine"
+                        }
+                    ],
+                    instructions: "Test instructions"
+                };
+
+                console.log("Sending payload:", JSON.stringify(payload, null, 2));
+
+                const response = await fetch(`${API_BASE_URL}/prescriptions.php`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                const text = await response.text();
+                console.log("Response text:", text);
+
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    return showResult("prescription-result", `Error parsing JSON:\n${text.substring(0, 500)}`, true);
+                }
+
+                if (data.success) {
+                    const summary = `✅ Prescription created successfully\n\nPrescription ID: ${data.data?.prescription_id}\n\nFull response:\n${JSON.stringify(data, null, 2)}`;
+                    return showResult("prescription-result", summary, false);
+                } else {
+                    const summary = `❌ Prescription creation failed\n\nError: ${data.message}\n\nFull response:\n${JSON.stringify(data, null, 2)}`;
+                    return showResult("prescription-result", summary, true);
+                }
+            } catch (error) {
+                return showResult("prescription-result", `Error: ${error.message}`, true);
+            }
+        }
+
+        async function testGetPrescriptions() {
+            const resultEl = document.getElementById("get-presc-result");
+            resultEl.style.display = 'block';
+            resultEl.className = 'result';
+            resultEl.innerHTML = '⏳ Retrieving prescriptions...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/prescriptions.php`);
+                const text = await response.text();
+                
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    return showResult("get-presc-result", `Error parsing JSON:\n${text.substring(0, 500)}`, true);
+                }
+
+                if (data.success && data.data && data.data.length > 0) {
+                    const summary = `✅ Found ${data.data.length} prescriptions\n\nFirst prescription:\n${JSON.stringify(data.data[0], null, 2)}`;
+                    return showResult("get-presc-result", summary, false);
+                } else {
+                    return showResult("get-presc-result", `Response: ${JSON.stringify(data)}`, !data.success);
+                }
+            } catch (error) {
+                return showResult("get-presc-result", `Error: ${error.message}`, true);
+            }
+        }
+
+        async function runDatabaseFix() {
+            const resultEl = document.getElementById("fix-result");
+            resultEl.style.display = 'block';
+            resultEl.className = 'result';
+            resultEl.innerHTML = '⏳ Running database fix...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/fix_database.php`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const summary = `✅ Database fixed successfully\n\nPrescriptions table: ${data.prescriptions_columns} columns\nPrescription_items table: ${data.items_columns} columns\n\nLog:\n${data.log.join('\n')}`;
+                    return showResult("fix-result", summary, false);
+                } else {
+                    return showResult("fix-result", `Error: ${data.message}\n\n${data.log.join('\n')}`, true);
+                }
+            } catch (error) {
+                return showResult("fix-result", `Error: ${error.message}`, true);
+            }
+        }
+
+        // Run all tests on page load
+        window.addEventListener('load', function() {
+            console.log('API Verification Tool loaded');
+            console.log('API Base URL:', API_BASE_URL);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test Dashboard - All Endpoints</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .test-result {
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .success {
+            background-color: #dcfce7;
+            border-left: 4px solid #22c55e;
+            color: #166534;
+        }
+        .error {
+            background-color: #fee2e2;
+            border-left: 4px solid #ef4444;
+            color: #991b1b;
+        }
+        .pending {
+            background-color: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            color: #92400e;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold mb-4 text-gray-800">🔍 Complete API Test Dashboard</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h3 class="font-bold">Total Tests</h3>
+                <p class="text-2xl font-bold text-blue-600" id="total-tests">0</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h3 class="font-bold">Passed</h3>
+                <p class="text-2xl font-bold text-green-600" id="passed-tests">0</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h3 class="font-bold">Failed</h3>
+                <p class="text-2xl font-bold text-red-600" id="failed-tests">0</p>
+            </div>
+        </div>
+
+        <button onclick="runAllTests()" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold mb-4 hover:bg-blue-700">
+            ▶️ Run All API Tests
+        </button>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-bold mb-4">API Endpoints Status</h2>
+            <div id="test-results" class="space-y-2">
+                <!-- Test results will appear here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = "http://localhost/update_after_mentoring_1/api";
+
+        const tests = [
+            {
+                name: "Medicines - GET All",
+                endpoint: "medicines.php",
+                method: "GET",
+                data: null,
+                expectArray: true
+            },
+            {
+                name: "Farms List - GET",
+                endpoint: "farms_list.php",
+                method: "GET",
+                data: null,
+                expectArray: true
+            },
+            {
+                name: "Farm Location - GET (FARM-001)",
+                endpoint: "farm_location.php?farm_id=FARM-001",
+                method: "GET",
+                data: null
+            },
+            {
+                name: "Vet Login",
+                endpoint: "vet_login.php",
+                method: "POST",
+                data: {
+                    vetId: "VET001",
+                    password: "password123"
+                }
+            },
+            {
+                name: "Prescriptions - GET",
+                endpoint: "prescriptions.php",
+                method: "GET",
+                data: null,
+                expectArray: true
+            },
+            {
+                name: "Prescriptions - POST (Create)",
+                endpoint: "prescriptions.php",
+                method: "POST",
+                data: {
+                    farm_id: "FARM-001",
+                    animal_id: "COW-001",
+                    animal_type: "Cattle",
+                    animal_weight: 450,
+                    animal_owner: "John Farmer",
+                    symptoms: "Fever",
+                    diagnosis: "Bacterial infection",
+                    vet_id: "VET001",
+                    administration_frequency: "Once daily",
+                    administration_time: "Morning",
+                    duration_days: 7,
+                    medicines: [
+                        {
+                            medicine_id: "amoxycillin",
+                            dosage_rate: 15,
+                            frequency: "Once daily",
+                            calculated_dosage: 6750,
+                            duration_days: 7
+                        }
+                    ],
+                    instructions: "Give with food"
+                }
+            },
+            {
+                name: "Lab Tests - GET",
+                endpoint: "lab_test_samples.php",
+                method: "GET",
+                data: null
+            },
+            {
+                name: "Lab Tests - POST (Create)",
+                endpoint: "lab_tests.php",
+                method: "POST",
+                data: {
+                    farm_id: "FARM-001",
+                    animal_id: "COW-001",
+                    test_type: "MRL Screening",
+                    sample_type: "Milk"
+                }
+            },
+            {
+                name: "Config - GET",
+                endpoint: "config.php",
+                method: "GET",
+                data: null
+            },
+            {
+                name: "Create Tables - POST",
+                endpoint: "create_tables.php",
+                method: "POST",
+                data: { action: "verify" }
+            }
+        ];
+
+        let testCount = 0;
+        let passedCount = 0;
+        let failedCount = 0;
+
+        async function runAllTests() {
+            const resultsContainer = document.getElementById("test-results");
+            resultsContainer.innerHTML = "";
+            testCount = 0;
+            passedCount = 0;
+            failedCount = 0;
+
+            for (const test of tests) {
+                await runTest(test);
+            }
+
+            updateStats();
+        }
+
+        async function runTest(test) {
+            testCount++;
+            const resultDiv = document.createElement("div");
+            resultDiv.className = "test-result pending";
+            resultDiv.id = `test-${testCount}`;
+            resultDiv.innerHTML = `<strong>⏳ ${test.name}</strong> - Testing...`;
+            document.getElementById("test-results").appendChild(resultDiv);
+
+            try {
+                const url = `${API_BASE_URL}/${test.endpoint}`;
+                const options = {
+                    method: test.method,
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                };
+
+                if (test.data && (test.method === "POST" || test.method === "PUT")) {
+                    options.body = JSON.stringify(test.data);
+                }
+
+                const response = await fetch(url, options);
+                const text = await response.text();
+
+                if (!response.ok) {
+                    failedCount++;
+                    resultDiv.className = "test-result error";
+                    resultDiv.innerHTML = `
+                        <strong>❌ ${test.name}</strong><br>
+                        <span class="status-badge" style="background: #fee2e2; color: #991b1b;">HTTP ${response.status}</span><br>
+                        <small>Response: ${text.substring(0, 200)}</small>
+                    `;
+                    return;
+                }
+
+                let data = null;
+                if (text.trim()) {
+                    data = JSON.parse(text);
+                }
+
+                // Check if response is valid
+                if (test.expectArray && !Array.isArray(data)) {
+                    failedCount++;
+                    resultDiv.className = "test-result error";
+                    resultDiv.innerHTML = `
+                        <strong>❌ ${test.name}</strong><br>
+                        <span class="status-badge" style="background: #fee2e2; color: #991b1b;">Invalid Response</span><br>
+                        <small>Expected array but got: ${typeof data}</small>
+                    `;
+                    return;
+                }
+
+                passedCount++;
+                resultDiv.className = "test-result success";
+                const itemCount = Array.isArray(data) ? data.length : 
+                                 (data && data.data ? (Array.isArray(data.data) ? data.data.length : '1') : '0');
+                resultDiv.innerHTML = `
+                    <strong>✅ ${test.name}</strong><br>
+                    <span class="status-badge" style="background: #dcfce7; color: #166534;">HTTP 200</span>
+                    <small>Response: ${itemCount} items ${Array.isArray(data) ? 'returned' : ''}</small>
+                `;
+
+            } catch (error) {
+                failedCount++;
+                resultDiv.className = "test-result error";
+                resultDiv.innerHTML = `
+                    <strong>❌ ${test.name}</strong><br>
+                    <span class="status-badge" style="background: #fee2e2; color: #991b1b;">Network Error</span><br>
+                    <small>${error.message}</small>
+                `;
+            }
+
+            updateStats();
+        }
+
+        function updateStats() {
+            document.getElementById("total-tests").textContent = testCount;
+            document.getElementById("passed-tests").textContent = passedCount;
+            document.getElementById("failed-tests").textContent = failedCount;
+        }
+
+        // Auto-run tests on load
+        window.addEventListener("load", runAllTests);
+    </script>
+</body>
+</html>

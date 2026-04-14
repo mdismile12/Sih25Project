@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Database Status Check</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow p-6">
+        <h1 class="text-2xl font-bold mb-4">🔧 Database & System Check</h1>
+        
+        <div id="status" class="space-y-4">
+            <div class="bg-blue-50 p-4 rounded border-l-4 border-blue-400">
+                <p><strong>Status:</strong> Checking system...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function checkSystem() {
+            const statusDiv = document.getElementById("status");
+            statusDiv.innerHTML = "";
+
+            // Check medicines API
+            try {
+                const med = await fetch("http://localhost/update_after_mentoring_1/api/medicines.php");
+                const medData = await med.json();
+                const medCount = Array.isArray(medData) ? medData.length : 0;
+                statusDiv.innerHTML += `
+                    <div class="${med.ok ? 'bg-green-50 border-green-400' : 'bg-red-50 border-red-400'} p-4 rounded border-l-4">
+                        <p><strong>✓ Medicines API:</strong> ${med.ok ? 'OK' : 'ERROR'}</p>
+                        <p class="text-sm text-gray-600">${medCount} medicines loaded</p>
+                    </div>
+                `;
+            } catch (e) {
+                statusDiv.innerHTML += `
+                    <div class="bg-red-50 p-4 rounded border-l-4 border-red-400">
+                        <p><strong>✗ Medicines API:</strong> FAILED</p>
+                        <p class="text-sm text-gray-600">${e.message}</p>
+                    </div>
+                `;
+            }
+
+            // Check farms API
+            try {
+                const farms = await fetch("http://localhost/update_after_mentoring_1/api/farms_list.php");
+                const farmsData = await farms.json();
+                const farmsCount = Array.isArray(farmsData) ? farmsData.length : 0;
+                statusDiv.innerHTML += `
+                    <div class="${farms.ok ? 'bg-green-50 border-green-400' : 'bg-red-50 border-red-400'} p-4 rounded border-l-4">
+                        <p><strong>✓ Farms API:</strong> ${farms.ok ? 'OK' : 'ERROR'}</p>
+                        <p class="text-sm text-gray-600">${farmsCount} farms loaded</p>
+                    </div>
+                `;
+            } catch (e) {
+                statusDiv.innerHTML += `
+                    <div class="bg-red-50 p-4 rounded border-l-4 border-red-400">
+                        <p><strong>✗ Farms API:</strong> FAILED</p>
+                        <p class="text-sm text-gray-600">${e.message}</p>
+                    </div>
+                `;
+            }
+
+            // Test prescription POST (without sending actual data)
+            try {
+                const presc = await fetch("http://localhost/update_after_mentoring_1/api/prescriptions.php", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({
+                        farm_id: "FARM-001",
+                        animal_id: "TEST-001",
+                        animal_type: "Cattle",
+                        animal_weight: 450,
+                        symptoms: "Test",
+                        vet_id: "VET001",
+                        medicines: []
+                    })
+                });
+                const prescData = await presc.json();
+                statusDiv.innerHTML += `
+                    <div class="${presc.ok ? 'bg-green-50 border-green-400' : 'bg-red-50 border-red-400'} p-4 rounded border-l-4">
+                        <p><strong>✓ Prescriptions API:</strong> ${presc.ok ? 'OK' : 'ERROR'}</p>
+                        <p class="text-sm text-gray-600">Response: ${prescData.message || prescData.error || 'No message'}</p>
+                    </div>
+                `;
+            } catch (e) {
+                statusDiv.innerHTML += `
+                    <div class="bg-red-50 p-4 rounded border-l-4 border-red-400">
+                        <p><strong>✗ Prescriptions API:</strong> FAILED</p>
+                        <p class="text-sm text-gray-600">${e.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        window.addEventListener("load", checkSystem);
+    </script>
+</body>
+</html>

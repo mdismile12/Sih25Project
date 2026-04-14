@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Diagnosis Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow p-6">
+        <h1 class="text-3xl font-bold mb-6">🔍 API Diagnosis Tool</h1>
+        
+        <div class="space-y-6">
+            <!-- Test 1: Medicines API -->
+            <div class="border p-4 rounded">
+                <h2 class="text-lg font-bold mb-2">1️⃣ Test Medicines API</h2>
+                <button onclick="testMedicinesAPI()" class="bg-blue-600 text-white px-4 py-2 rounded">Test</button>
+                <div id="medicines-result" class="mt-4 text-sm font-mono bg-gray-100 p-4 rounded hidden"></div>
+            </div>
+
+            <!-- Test 2: Prescription API -->
+            <div class="border p-4 rounded">
+                <h2 class="text-lg font-bold mb-2">2️⃣ Test Prescription API</h2>
+                <button onclick="testPrescriptionAPI()" class="bg-blue-600 text-white px-4 py-2 rounded">Test</button>
+                <div id="prescription-result" class="mt-4 text-sm font-mono bg-gray-100 p-4 rounded hidden"></div>
+            </div>
+
+            <!-- Test 3: Database Check -->
+            <div class="border p-4 rounded">
+                <h2 class="text-lg font-bold mb-2">3️⃣ Check Database Tables</h2>
+                <button onclick="testDatabaseTables()" class="bg-blue-600 text-white px-4 py-2 rounded">Test</button>
+                <div id="database-result" class="mt-4 text-sm font-mono bg-gray-100 p-4 rounded hidden"></div>
+            </div>
+
+            <!-- Test 4: Create Sample Data -->
+            <div class="border p-4 rounded">
+                <h2 class="text-lg font-bold mb-2">4️⃣ Run Database Migration</h2>
+                <p class="text-sm text-gray-600 mb-3">Initializes prescription_items table and adds missing columns</p>
+                <button onclick="runDatabaseMigration()" class="bg-green-600 text-white px-4 py-2 rounded">Run Migration</button>
+                <div id="migration-result" class="mt-4 text-sm font-mono bg-gray-100 p-4 rounded hidden max-h-96 overflow-auto"></div>
+            </div>
+
+            <!-- Raw Response Viewer -->
+            <div class="border p-4 rounded">
+                <h2 class="text-lg font-bold mb-2">5️⃣ Raw API Response (Prescription POST)</h2>
+                <div class="space-y-2 mb-4">
+                    <div>
+                        <label class="block font-bold mb-1">Farm ID:</label>
+                        <input type="text" id="farm-id" value="FARM-001" class="w-full border p-2 rounded">
+                    </div>
+                    <div>
+                        <label class="block font-bold mb-1">Animal Weight:</label>
+                        <input type="number" id="animal-weight" value="450" class="w-full border p-2 rounded">
+                    </div>
+                </div>
+                <button onclick="getRawResponse()" class="bg-purple-600 text-white px-4 py-2 rounded">Get Response</button>
+                <div id="raw-response" class="mt-4 text-sm font-mono bg-gray-100 p-4 rounded hidden max-h-96 overflow-auto"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = "http://localhost/update_after_mentoring_1/api";
+
+        async function testMedicinesAPI() {
+            const resultDiv = document.getElementById("medicines-result");
+            resultDiv.classList.remove("hidden");
+            resultDiv.innerHTML = "Testing...";
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/medicines.php`);
+                const text = await response.text();
+                
+                let result;
+                try {
+                    result = JSON.parse(text);
+                    resultDiv.innerHTML = `✅ Success<br>Items: ${Array.isArray(result) ? result.length : '?'}<br><br>${JSON.stringify(result, null, 2)}`;
+                } catch (e) {
+                    resultDiv.innerHTML = `❌ JSON Parse Error<br>Response: ${text.substring(0, 300)}`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `❌ Error: ${error.message}`;
+            }
+        }
+
+        async function testPrescriptionAPI() {
+            const resultDiv = document.getElementById("prescription-result");
+            resultDiv.classList.remove("hidden");
+            resultDiv.innerHTML = "Testing...";
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/prescriptions.php?id=1`);
+                const text = await response.text();
+                
+                let result;
+                try {
+                    result = JSON.parse(text);
+                    resultDiv.innerHTML = `✅ Success<br>Items: ${Array.isArray(result) ? result.length : '?'}<br><br>${JSON.stringify(result, null, 2).substring(0, 500)}`;
+                } catch (e) {
+                    resultDiv.innerHTML = `❌ JSON Parse Error<br>Response: ${text.substring(0, 300)}`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `❌ Error: ${error.message}`;
+            }
+        }
+
+        async function testDatabaseTables() {
+            const resultDiv = document.getElementById("database-result");
+            resultDiv.classList.remove("hidden");
+            resultDiv.innerHTML = "Testing...";
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/create_tables.php`, {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({action: "check"})
+                });
+                const text = await response.text();
+                
+                resultDiv.innerHTML = text.substring(0, 500);
+            } catch (error) {
+                resultDiv.innerHTML = `❌ Error: ${error.message}`;
+            }
+        }
+
+        async function createSampleData() {
+            const resultDiv = document.getElementById("sample-result");
+            resultDiv.classList.remove("hidden");
+            resultDiv.innerHTML = "Creating...";
+
+            try {
+                // This would need a dedicated endpoint
+                resultDiv.innerHTML = "Sample data creation requires database access";
+            } catch (error) {
+                resultDiv.innerHTML = `❌ Error: ${error.message}`;
+            }
+        }
+
+        async function runDatabaseMigration() {
+            const resultDiv = document.getElementById("migration-result");
+            resultDiv.classList.remove("hidden");
+            resultDiv.innerHTML = "Running migration...";
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/run_migration.php`, {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"}
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    const logHtml = result.log.map(line => `<div>${line}</div>`).join('');
+                    resultDiv.innerHTML = `✅ Success<br><strong>Prescriptions Columns:</strong> ${result.prescriptions_columns}<br><strong>Items Columns:</strong> ${result.items_columns}<br><br><strong>Log:</strong><br>${logHtml}`;
+                } else {
+                    resultDiv.innerHTML = `❌ Error: ${result.message}<br><br>${result.log.join('<br>')}`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `❌ Error: ${error.message}`;
+            }
+        }
+
+        async function getRawResponse() {
+            const resultDiv = document.getElementById("raw-response");
+            resultDiv.classList.remove("hidden");
+            resultDiv.innerHTML = "Fetching...";
+
+            try {
+                const farmId = document.getElementById("farm-id").value;
+                const weight = document.getElementById("animal-weight").value;
+
+                const response = await fetch(`${API_BASE_URL}/prescriptions.php`, {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({
+                        farm_id: farmId,
+                        animal_id: "TEST-001",
+                        animal_type: "Cattle",
+                        animal_weight: parseFloat(weight),
+                        symptoms: "Test",
+                        vet_id: "VET001",
+                        medicines: []
+                    })
+                });
+
+                const text = await response.text();
+                resultDiv.innerHTML = `<strong>Status:</strong> ${response.status}<br><strong>Raw Response:</strong><br>${text}`;
+            } catch (error) {
+                resultDiv.innerHTML = `❌ Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

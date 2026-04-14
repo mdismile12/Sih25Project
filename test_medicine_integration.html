@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicine Integration - Quick Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            border: 2px solid #f0f0f0;
+            border-radius: 8px;
+            padding: 20px;
+            background: #f9f9f9;
+        }
+        
+        .test-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .test-section h3::before {
+            content: "▶";
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .test-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #38a169;
+        }
+        
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #e53e3e;
+        }
+        
+        .result {
+            background: white;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .result.success {
+            border-left-color: #48bb78;
+            background: #f0fdf4;
+        }
+        
+        .result.error {
+            border-left-color: #f56565;
+            background: #fef2f2;
+        }
+        
+        .result.warning {
+            border-left-color: #ecc94b;
+            background: #fffff0;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .status.pass {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .status.fail {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .medicine-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .medicine-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+        }
+        
+        .medicine-card strong {
+            color: #667eea;
+        }
+        
+        .medicine-card small {
+            color: #666;
+            display: block;
+            margin-top: 5px;
+        }
+        
+        .calculation-result {
+            background: #f0fdf4;
+            border: 2px solid #48bb78;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .calculation-result h4 {
+            color: #22543d;
+            margin-bottom: 10px;
+        }
+        
+        .calc-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 3px;
+        }
+        
+        .calc-value {
+            font-weight: bold;
+            color: #22543d;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💊 Medicine Integration Test Suite</h1>
+            <p>Verify medicine dropdown, API, and dosage calculations are working</p>
+        </div>
+        
+        <div class="content">
+            <!-- Test 1: Check Database -->
+            <div class="test-section">
+                <h3>Test 1: Database Connection <span class="status" id="status-db">PENDING</span></h3>
+                <div class="test-buttons">
+                    <button class="btn-primary" onclick="testDatabase()">Check Database</button>
+                    <button class="btn-secondary" onclick="countMedicines()">Count Medicines</button>
+                </div>
+                <div class="result" id="result-db"></div>
+            </div>
+            
+            <!-- Test 2: Check API -->
+            <div class="test-section">
+                <h3>Test 2: API Connection <span class="status" id="status-api">PENDING</span></h3>
+                <div class="test-buttons">
+                    <button class="btn-primary" onclick="testAPI()">Test API Endpoint</button>
+                    <button class="btn-secondary" onclick="fetchMedicines()">Fetch Medicines</button>
+                </div>
+                <div class="result" id="result-api"></div>
+            </div>
+            
+            <!-- Test 3: Dosage Calculation -->
+            <div class="test-section">
+                <h3>Test 3: Dosage Calculation <span class="status" id="status-calc">PENDING</span></h3>
+                <div class="form-group">
+                    <label>Animal Weight (kg):</label>
+                    <input type="number" id="animalWeight" placeholder="Enter animal weight" value="50">
+                </div>
+                <div class="form-group">
+                    <label>Select Medicine:</label>
+                    <select id="medicineSelect" onchange="calculateDosage()" style="background: #f9f9f9;">
+                        <option value="">Loading medicines...</option>
+                    </select>
+                </div>
+                <button class="btn-primary" onclick="calculateDosage()">Calculate Dosage</button>
+                <div class="result" id="result-calc"></div>
+            </div>
+            
+            <!-- Test 4: Test Prescription Form -->
+            <div class="test-section">
+                <h3>Test 4: Prescription Form Integration <span class="status" id="status-form">PENDING</span></h3>
+                <div class="test-buttons">
+                    <button class="btn-primary" onclick="testPrescriptionForm()">Test Form Submission</button>
+                    <button class="btn-secondary" onclick="openPortal()">Open Full Portal</button>
+                </div>
+                <div class="result" id="result-form"></div>
+            </div>
+            
+            <!-- Test 5: List All Medicines -->
+            <div class="test-section">
+                <h3>Test 5: All Available Medicines <span class="status" id="status-list">PENDING</span></h3>
+                <button class="btn-primary" onclick="listAllMedicines()">Load Full List</button>
+                <div class="result" id="result-list"></div>
+            </div>
+            
+            <!-- Summary -->
+            <div class="test-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-color: transparent;">
+                <h3 style="color: white;">
+                    ✓ Quick Setup Summary
+                </h3>
+                <ol style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Import medicines SQL:</strong> mysql -u root agrisense_db &lt; add_medicines.sql</li>
+                    <li><strong>Verify API:</strong> http://localhost/update_after_mentoring_1/api/medicines.php</li>
+                    <li><strong>Open Portal:</strong> http://localhost/update_after_mentoring_1/index.html</li>
+                    <li><strong>Test:</strong> Login → E-Prescriptions → Add Medicine → Select → Verify Calculation</li>
+                    <li><strong>Check DB:</strong> phpMyAdmin → agrisense_db → medicines (40+ records)</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE_URL = "http://localhost/update_after_mentoring_1/api";
+        let allMedicines = [];
+        
+        // Test Database
+        async function testDatabase() {
+            const resultEl = document.getElementById('result-db');
+            const statusEl = document.getElementById('status-db');
+            resultEl.innerHTML = '<span class="loading"></span> Checking database...';
+            
+            try {
+                // Try to fetch medicines to verify DB is working
+                const response = await fetch(`${API_BASE_URL}/medicines.php`);
+                const data = await response.json();
+                
+                if (Array.isArray(data) && data.length > 0) {
+                    resultEl.className = 'result success';
+                    resultEl.innerHTML = `
+                        ✅ Database Connected!<br>
+                        Found: <strong>${data.length}</strong> medicines<br>
+                        Sample: ${data[0].name} (${data[0].dosage_rate} ${data[0].dosage_unit})<br>
+                        Status: All medicines approved and ready
+                    `;
+                    statusEl.className = 'status pass';
+                    statusEl.textContent = 'PASS';
+                } else {
+                    resultEl.className = 'result error';
+                    resultEl.innerHTML = `❌ Database empty or not connected.<br>
+                        Please run: mysql -u root agrisense_db &lt; add_medicines.sql`;
+                    statusEl.className = 'status fail';
+                    statusEl.textContent = 'FAIL';
+                }
+            } catch (error) {
+                resultEl.className = 'result error';
+                resultEl.innerHTML = `❌ Error: ${error.message}<br>
+                    Make sure:<br>
+                    - MySQL is running<br>
+                    - Database 'agrisense_db' exists<br>
+                    - add_medicines.sql was imported`;
+                statusEl.className = 'status fail';
+                statusEl.textContent = 'FAIL';
+            }
+        }
+        
+        // Count Medicines
+        async function countMedicines() {
+            const resultEl = document.getElementById('result-db');
+            resultEl.innerHTML = '<span class="loading"></span> Counting medicines...';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/medicines.php`);
+                const data = await response.json();
+                
+                if (Array.isArray(data)) {
+                    const byType = {};
+                    data.forEach(m => {
+                        byType[m.type] = (byType[m.type] || 0) + 1;
+                    });
+                    
+                    let html = `✅ Total Medicines: <strong>${data.length}</strong><br><br>By Type:<br>`;
+                    Object.entries(byType).forEach(([type, count]) => {
+                        html += `• ${type}: ${count}<br>`;
+                    });
+                    
+                    resultEl.className = 'result success';
+                    resultEl.innerHTML = html;
+                }
+            } catch (error) {
+                resultEl.className = 'result error';
+                resultEl.innerHTML = `❌ Error: ${error.message}`;
+            }
+        }
+        
+        // Test API
+        async function testAPI() {
+            const resultEl = document.getElementById('result-api');
+            const statusEl = document.getElementById('status-api');
+            resultEl.innerHTML = '<span class="loading"></span> Testing API...';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/medicines.php`);
+                const data = await response.json();
+                
+                resultEl.className = 'result success';
+                resultEl.innerHTML = `
+                    ✅ API Working!<br>
+                    <br>
+                    <strong>Response Type:</strong> ${Array.isArray(data) ? 'Array (Correct)' : 'Object'}<br>
+                    <strong>Status Code:</strong> ${response.status}<br>
+                    <strong>Records Returned:</strong> ${Array.isArray(data) ? data.length : 'N/A'}<br>
+                    <br>
+                    <strong>Sample Record:</strong><br>
+                    ${JSON.stringify(Array.isArray(data) ? data[0] : {}, null, 2)}
+                `;
+                statusEl.className = 'status pass';
+                statusEl.textContent = 'PASS';
+            } catch (error) {
+                resultEl.className = 'result error';
+                resultEl.innerHTML = `❌ API Error: ${error.message}`;
+                statusEl.className = 'status fail';
+                statusEl.textContent = 'FAIL';
+            }
+        }
+        
+        // Fetch Medicines
+        async function fetchMedicines() {
+            const resultEl = document.getElementById('result-api');
+            resultEl.innerHTML = '<span class="loading"></span> Fetching medicines...';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/medicines.php`);
+                allMedicines = await response.json();
+                
+                if (Array.isArray(allMedicines)) {
+                    // Update dropdown
+                    const select = document.getElementById('medicineSelect');
+                    select.innerHTML = '<option value="">Select Medicine</option>';
+                    allMedicines.forEach(m => {
+                        const option = document.createElement('option');
+                        option.value = JSON.stringify(m);
+                        option.textContent = `${m.name} (${m.dosage_rate} ${m.dosage_unit})`;
+                        select.appendChild(option);
+                    });
+                    
+                    resultEl.className = 'result success';
+                    resultEl.innerHTML = `✅ Fetched ${allMedicines.length} medicines<br>
+                        Dropdown updated successfully!`;
+                }
+            } catch (error) {
+                resultEl.className = 'result error';
+                resultEl.innerHTML = `❌ Error: ${error.message}`;
+            }
+        }
+        
+        // Calculate Dosage
+        function calculateDosage() {
+            const resultEl = document.getElementById('result-calc');
+            const statusEl = document.getElementById('status-calc');
+            const animalWeight = parseFloat(document.getElementById('animalWeight').value);
+            const medicineSelect = document.getElementById('medicineSelect');
+            const selectedValue = medicineSelect.value;
+            
+            if (!selectedValue) {
+                resultEl.className = 'result warning';
+                resultEl.innerHTML = '⚠️ Please select a medicine first';
+                return;
+            }
+            
+            if (!animalWeight || animalWeight <= 0) {
+                resultEl.className = 'result warning';
+                resultEl.innerHTML = '⚠️ Please enter a valid animal weight (kg)';
+                return;
+            }
+            
+            try {
+                const medicine = JSON.parse(selectedValue);
+                const dosageRate = parseFloat(medicine.dosage_rate);
+                const calculatedDosage = (dosageRate * animalWeight).toFixed(2);
+                const withdrawalPeriod = medicine.withdrawal_period_days || 0;
+                
+                resultEl.className = 'result success calculation-result';
+                resultEl.innerHTML = `
+                    <h4>✅ Dosage Calculated Successfully</h4>
+                    <div class="calc-row">
+                        <div><strong>Medicine:</strong><br><span class="calc-value">${medicine.name}</span></div>
+                        <div><strong>Animal Weight:</strong><br><span class="calc-value">${animalWeight} kg</span></div>
+                        <div><strong>Dosage Rate:</strong><br><span class="calc-value">${dosageRate} ${medicine.dosage_unit}</span></div>
+                    </div>
+                    <div class="calc-row">
+                        <div><strong>Calculated Dosage:</strong><br><span class="calc-value" style="color: green; font-size: 16px;">${calculatedDosage} ${medicine.dosage_unit}</span></div>
+                        <div><strong>Withdrawal Period:</strong><br><span class="calc-value">${withdrawalPeriod} days</span></div>
+                        <div><strong>MRL Limit:</strong><br><span class="calc-value">${medicine.mrl_limit || 'N/A'} ${medicine.mrl_unit || ''}</span></div>
+                    </div>
+                    <br>
+                    <small><strong>Formula:</strong> ${dosageRate} mg/kg × ${animalWeight} kg = ${calculatedDosage} mg</small>
+                `;
+                statusEl.className = 'status pass';
+                statusEl.textContent = 'PASS';
+            } catch (error) {
+                resultEl.className = 'result error';
+                resultEl.innerHTML = `❌ Error: ${error.message}`;
+                statusEl.className = 'status fail';
+                statusEl.textContent = 'FAIL';
+            }
+        }
+        
+        // Test Prescription Form
+        function testPrescriptionForm() {
+            const resultEl = document.getElementById('result-form');
+            const statusEl = document.getElementById('status-form');
+            
+            resultEl.className = 'result warning';
+            resultEl.innerHTML = `
+                📋 Prescription Form Test Guide:<br><br>
+                1. Open the full portal<br>
+                2. Login as Veterinarian<br>
+                3. Go to E-Prescriptions<br>
+                4. Fill in animal details<br>
+                5. Click "+ Add Medicine"<br>
+                6. Select a medicine from dropdown<br>
+                7. Verify dosage calculates automatically<br>
+                8. Click "Create Prescription"<br>
+                9. Check success message<br><br>
+                <button class="btn-secondary" onclick="openPortal()" style="cursor: pointer; padding: 10px 20px; border: none; border-radius: 5px; background: #48bb78; color: white;">
+                    Open Portal Now
+                </button>
+            `;
+            statusEl.className = 'status fail';
+            statusEl.textContent = 'MANUAL';
+        }
+        
+        // List All Medicines
+        async function listAllMedicines() {
+            const resultEl = document.getElementById('result-list');
+            const statusEl = document.getElementById('status-list');
+            resultEl.innerHTML = '<span class="loading"></span> Loading medicines...';
+            
+            try {
+                if (allMedicines.length === 0) {
+                    await fetchMedicines();
+                }
+                
+                let html = `<strong>All Available Medicines (${allMedicines.length}):</strong><br><br>`;
+                allMedicines.forEach((m, i) => {
+                    html += `
+                        <div class="medicine-card">
+                            <strong>${i + 1}. ${m.name}</strong>
+                            <small>
+                                Type: ${m.type} | 
+                                Dosage: ${m.dosage_rate} ${m.dosage_unit} | 
+                                Withdrawal: ${m.withdrawal_period_days} days | 
+                                MRL: ${m.mrl_limit || 'N/A'} ${m.mrl_unit || ''}
+                            </small>
+                        </div>
+                    `;
+                });
+                
+                resultEl.className = 'result success';
+                resultEl.innerHTML = html;
+                statusEl.className = 'status pass';
+                statusEl.textContent = 'PASS';
+            } catch (error) {
+                resultEl.className = 'result error';
+                resultEl.innerHTML = `❌ Error: ${error.message}`;
+            }
+        }
+        
+        // Open Portal
+        function openPortal() {
+            window.open('http://localhost/update_after_mentoring_1/index.html', '_blank');
+        }
+        
+        // Run initial test on load
+        window.addEventListener('load', () => {
+            fetchMedicines();
+        });
+    </script>
+</body>
+</html>

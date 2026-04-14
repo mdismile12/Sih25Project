@@ -1,0 +1,745 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AMU Trend Analysis Dashboard</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: rgba(255, 255, 255, 0.98);
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    h1 {
+      color: #667eea;
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .subtitle {
+      color: #888;
+      font-size: 1.1em;
+      margin-bottom: 20px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      border-bottom: 2px solid #e0e0e0;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      padding: 12px 20px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      color: #888;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s ease;
+      font-size: 1em;
+    }
+
+    .tab-btn:hover {
+      color: #667eea;
+    }
+
+    .tab-btn.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      align-items: end;
+      margin-top: 20px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 8px;
+      font-size: 0.95em;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    select, input {
+      padding: 12px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1em;
+      font-family: 'Segoe UI', sans-serif;
+      transition: all 0.3s ease;
+      background-color: #fff;
+    }
+
+    select:hover, input:hover {
+      border-color: #667eea;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+    }
+
+    select:focus, input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    button {
+      padding: 12px 30px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+
+    .tab-content {
+      display: none;
+      margin-top: 30px;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .data-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+      gap: 25px;
+      margin-top: 30px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+    }
+
+    .card h3 {
+      color: #667eea;
+      font-size: 1.3em;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    table th {
+      background: #f5f5f5;
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      color: #333;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    table td {
+      padding: 12px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    table tr:hover {
+      background: #f9f9f9;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      font-weight: 600;
+    }
+
+    .badge-high {
+      background: #ffebee;
+      color: #c62828;
+    }
+
+    .badge-medium {
+      background: #fff3e0;
+      color: #e65100;
+    }
+
+    .badge-low {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .badge-trend-up {
+      background: #ffebee;
+      color: #c62828;
+    }
+
+    .badge-trend-down {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .badge-trend-stable {
+      background: #e3f2fd;
+      color: #1565c0;
+    }
+
+    .chart-wrap {
+      position: relative;
+      height: 400px;
+      margin-top: 20px;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+      color: #667eea;
+    }
+
+    .loading.show {
+      display: block;
+    }
+
+    .stat-box {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .stat-value {
+      font-size: 2em;
+      font-weight: bold;
+    }
+
+    .stat-label {
+      font-size: 0.9em;
+      opacity: 0.9;
+    }
+
+    .info-box {
+      background: #f0f7ff;
+      border-left: 4px solid #667eea;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .data-grid {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 1.8em;
+      }
+
+      .tabs {
+        flex-direction: column;
+      }
+
+      .tab-btn {
+        border-bottom: none;
+        border-left: 3px solid transparent;
+      }
+
+      .tab-btn.active {
+        border-left-color: #667eea;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1><i class="fas fa-chart-line"></i> AMU Trend Analysis Dashboard</h1>
+      <p class="subtitle">Medicine usage patterns, species-wise trends, and detailed analytics</p>
+
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="high-usage"><i class="fas fa-arrow-up"></i> High Usage</button>
+        <button class="tab-btn" data-tab="species"><i class="fas fa-paw"></i> Species Analysis</button>
+        <button class="tab-btn" data-tab="trends"><i class="fas fa-chart-area"></i> Trends</button>
+        <button class="tab-btn" data-tab="top-medicines"><i class="fas fa-star"></i> Top Medicines</button>
+        <button class="tab-btn" data-tab="reasons"><i class="fas fa-list"></i> Treatment Reasons</button>
+      </div>
+
+      <div class="controls">
+        <div class="control-group">
+          <label><i class="fas fa-map-pin"></i> State</label>
+          <input id="filter-state" type="text" placeholder="e.g., Karnataka">
+        </div>
+
+        <div class="control-group">
+          <label><i class="fas fa-paw"></i> Species</label>
+          <select id="filter-species">
+            <option value="">All Species</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label><i class="fas fa-pills"></i> Medicine</label>
+          <input id="filter-medicine" type="text" placeholder="Medicine name/ID">
+        </div>
+
+        <div class="control-group">
+          <button id="apply-filters"><i class="fas fa-filter"></i> Apply Filters</button>
+        </div>
+
+        <div class="control-group">
+          <button id="refresh-stats"><i class="fas fa-sync-alt"></i> Refresh Stats</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- High Usage Tab -->
+    <div id="high-usage" class="tab-content active">
+      <div class="info-box">
+        <i class="fas fa-info-circle"></i> <strong>High Usage Medicines:</strong> Shows medicines with highest total consumption volume across your filtered parameters.
+      </div>
+      <div class="loading" id="loading-high">
+        <i class="fas fa-spinner fa-spin"></i> Loading...
+      </div>
+      <div class="card">
+        <h3><i class="fas fa-arrow-up" style="color: #ff6384;"></i> Top Medicines by Usage Volume</h3>
+        <table id="high-usage-table">
+          <thead>
+            <tr>
+              <th>Medicine Name</th>
+              <th>Species</th>
+              <th>Total Amount</th>
+              <th>Unit</th>
+              <th>Usage Count</th>
+              <th>Avg Usage</th>
+              <th>State</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Species Tab -->
+    <div id="species" class="tab-content">
+      <div class="info-box">
+        <i class="fas fa-info-circle"></i> <strong>Species-wise Medicines:</strong> Organized by animal species, showing which medicines are used for each.
+      </div>
+      <div class="loading" id="loading-species">
+        <i class="fas fa-spinner fa-spin"></i> Loading...
+      </div>
+      <div class="card">
+        <h3><i class="fas fa-paw" style="color: #36a2eb;"></i> Medicine Usage by Species</h3>
+        <table id="species-table">
+          <thead>
+            <tr>
+              <th>Species</th>
+              <th>Medicine</th>
+              <th>Category</th>
+              <th>Total Used</th>
+              <th>Unit</th>
+              <th>Prescriptions</th>
+              <th>Avg Dose</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Trends Tab -->
+    <div id="trends" class="tab-content">
+      <div class="info-box">
+        <i class="fas fa-info-circle"></i> <strong>Trend Analysis:</strong> Month-over-month usage patterns with trend direction (increasing/decreasing/stable).
+      </div>
+      <div class="loading" id="loading-trends">
+        <i class="fas fa-spinner fa-spin"></i> Loading...
+      </div>
+      <div class="card">
+        <h3><i class="fas fa-chart-area" style="color: #667eea;"></i> Monthly Trends & Patterns</h3>
+        <table id="trends-table">
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>Medicine</th>
+              <th>Species</th>
+              <th>Total Amount</th>
+              <th>Usage Count</th>
+              <th>Trend</th>
+              <th>Change %</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Top Medicines Tab -->
+    <div id="top-medicines" class="tab-content">
+      <div class="info-box">
+        <i class="fas fa-info-circle"></i> <strong>Top Medicines by Region:</strong> Regional breakdown of most used medicines across states/districts.
+      </div>
+      <div class="loading" id="loading-top">
+        <i class="fas fa-spinner fa-spin"></i> Loading...
+      </div>
+      <div class="card">
+        <h3><i class="fas fa-star" style="color: #ffc107;"></i> Top Medicines by Region</h3>
+        <table id="top-medicines-table">
+          <thead>
+            <tr>
+              <th>Region</th>
+              <th>Medicine</th>
+              <th>Category</th>
+              <th>Total Usage</th>
+              <th>Prescriptions</th>
+              <th>Avg Dosage</th>
+              <th>Unit</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Reasons Tab -->
+    <div id="reasons" class="tab-content">
+      <div class="info-box">
+        <i class="fas fa-info-circle"></i> <strong>Treatment Reasons:</strong> Common reasons for prescriptions and their frequency.
+      </div>
+      <div class="loading" id="loading-reasons">
+        <i class="fas fa-spinner fa-spin"></i> Loading...
+      </div>
+      <div class="data-grid">
+        <div class="card">
+          <h3><i class="fas fa-list" style="color: #667eea;"></i> Most Common Treatment Reasons</h3>
+          <table id="reasons-table">
+            <thead>
+              <tr>
+                <th>Treatment Reason</th>
+                <th>Frequency</th>
+                <th>Percentage</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <h3><i class="fas fa-doughnut-chart" style="color: #ff9800;"></i> Statistics</h3>
+          <div id="reasons-stats"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const apiBase = 'api/amu_trends.php';
+    let currentFilters = {
+      state: '',
+      species: '',
+      medicine_id: ''
+    };
+
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabName = btn.dataset.tab;
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(tabName).classList.add('active');
+        loadTabData(tabName);
+      });
+    });
+
+    // Load species dropdown
+    async function loadSpecies() {
+      try {
+        const res = await fetch(`${apiBase}?action=species_list`);
+        const json = await res.json();
+        if (json.success && json.data) {
+          const select = document.getElementById('filter-species');
+          json.data.forEach(sp => {
+            const opt = document.createElement('option');
+            opt.value = sp;
+            opt.textContent = sp;
+            select.appendChild(opt);
+          });
+        }
+      } catch (err) {
+        console.error('Failed to load species:', err);
+      }
+    }
+
+    // Build query string from filters
+    function buildQuery(action, extra = {}) {
+      const params = new URLSearchParams();
+      params.set('action', action);
+      if (currentFilters.state) params.set('state', currentFilters.state);
+      if (currentFilters.species) params.set('species', currentFilters.species);
+      if (currentFilters.medicine_id) params.set('medicine_id', currentFilters.medicine_id);
+      Object.entries(extra).forEach(([k, v]) => {
+        if (v) params.set(k, v);
+      });
+      return params.toString();
+    }
+
+    // Load tab data
+    async function loadTabData(tab) {
+      if (tab === 'high-usage') loadHighUsage();
+      else if (tab === 'species') loadSpeciesUsage();
+      else if (tab === 'trends') loadTrends();
+      else if (tab === 'top-medicines') loadTopMedicines();
+      else if (tab === 'reasons') loadReasons();
+    }
+
+    async function loadHighUsage() {
+      document.getElementById('loading-high').classList.add('show');
+      try {
+        const res = await fetch(`${apiBase}?${buildQuery('high_usage', { limit: 20 })}`);
+        const json = await res.json();
+        if (json.success) {
+          const tbody = document.querySelector('#high-usage-table tbody');
+          tbody.innerHTML = '';
+          json.data.forEach(row => {
+            tbody.innerHTML += `
+              <tr>
+                <td><strong>${row.medicine_name}</strong></td>
+                <td><span class="badge badge-low">${row.species || 'N/A'}</span></td>
+                <td>${parseFloat(row.total_amount).toFixed(2)}</td>
+                <td>${row.unit || 'mg'}</td>
+                <td>${row.usage_count}</td>
+                <td>${parseFloat(row.avg_usage || 0).toFixed(2)}</td>
+                <td>${row.state || 'National'}</td>
+              </tr>
+            `;
+          });
+        }
+      } catch (err) {
+        console.error('Error loading high usage:', err);
+      }
+      document.getElementById('loading-high').classList.remove('show');
+    }
+
+    async function loadSpeciesUsage() {
+      document.getElementById('loading-species').classList.add('show');
+      try {
+        const res = await fetch(`${apiBase}?${buildQuery('species_usage')}`);
+        const json = await res.json();
+        if (json.success) {
+          const tbody = document.querySelector('#species-table tbody');
+          tbody.innerHTML = '';
+          json.data.forEach(row => {
+            const badge = row.amu_category === 'VCIA' ? 'badge-high' : (row.amu_category === 'VHIA' ? 'badge-medium' : 'badge-low');
+            tbody.innerHTML += `
+              <tr>
+                <td><strong>${row.species || 'N/A'}</strong></td>
+                <td>${row.medicine_name}</td>
+                <td><span class="badge ${badge}">${row.amu_category}</span></td>
+                <td>${parseFloat(row.total_amount).toFixed(2)}</td>
+                <td>${row.unit || 'mg'}</td>
+                <td>${row.usage_count}</td>
+                <td>${parseFloat(row.avg_amount || 0).toFixed(2)}</td>
+              </tr>
+            `;
+          });
+        }
+      } catch (err) {
+        console.error('Error loading species usage:', err);
+      }
+      document.getElementById('loading-species').classList.remove('show');
+    }
+
+    async function loadTrends() {
+      document.getElementById('loading-trends').classList.add('show');
+      try {
+        const res = await fetch(`${apiBase}?${buildQuery('trend_analysis')}`);
+        const json = await res.json();
+        if (json.success) {
+          const tbody = document.querySelector('#trends-table tbody');
+          tbody.innerHTML = '';
+          json.data.forEach(row => {
+            const trend = row.trend || 'stable';
+            const trendBadge = trend === 'increasing' ? 'badge-trend-up' : (trend === 'decreasing' ? 'badge-trend-down' : 'badge-trend-stable');
+            const trendIcon = trend === 'increasing' ? '📈' : (trend === 'decreasing' ? '📉' : '➡️');
+            tbody.innerHTML += `
+              <tr>
+                <td>${row.month}</td>
+                <td>${row.medicine_name}</td>
+                <td>${row.species || 'N/A'}</td>
+                <td>${parseFloat(row.total_amount).toFixed(2)}</td>
+                <td>${row.usage_count}</td>
+                <td><span class="badge ${trendBadge}">${trendIcon} ${trend}</span></td>
+                <td>${row.trend_percentage ? row.trend_percentage.toFixed(1) : '0.0'}%</td>
+              </tr>
+            `;
+          });
+        }
+      } catch (err) {
+        console.error('Error loading trends:', err);
+      }
+      document.getElementById('loading-trends').classList.remove('show');
+    }
+
+    async function loadTopMedicines() {
+      document.getElementById('loading-top').classList.add('show');
+      try {
+        const res = await fetch(`${apiBase}?${buildQuery('top_medicines', { limit: 20 })}`);
+        const json = await res.json();
+        if (json.success) {
+          const tbody = document.querySelector('#top-medicines-table tbody');
+          tbody.innerHTML = '';
+          json.data.forEach(row => {
+            const badge = row.amu_category === 'VCIA' ? 'badge-high' : (row.amu_category === 'VHIA' ? 'badge-medium' : 'badge-low');
+            tbody.innerHTML += `
+              <tr>
+                <td><strong>${row.region || 'National'}</strong></td>
+                <td>${row.medicine_name}</td>
+                <td><span class="badge ${badge}">${row.amu_category}</span></td>
+                <td>${parseFloat(row.total_usage).toFixed(2)}</td>
+                <td>${row.prescription_count}</td>
+                <td>${parseFloat(row.avg_dosage || 0).toFixed(2)}</td>
+                <td>${row.unit || 'mg'}</td>
+              </tr>
+            `;
+          });
+        }
+      } catch (err) {
+        console.error('Error loading top medicines:', err);
+      }
+      document.getElementById('loading-top').classList.remove('show');
+    }
+
+    async function loadReasons() {
+      document.getElementById('loading-reasons').classList.add('show');
+      try {
+        const res = await fetch(`${apiBase}?${buildQuery('reasons')}`);
+        const json = await res.json();
+        if (json.success) {
+          const tbody = document.querySelector('#reasons-table tbody');
+          tbody.innerHTML = '';
+          const total = json.data.reduce((sum, r) => sum + r.count, 0);
+          json.data.slice(0, 15).forEach(row => {
+            const pct = ((row.count / total) * 100).toFixed(1);
+            tbody.innerHTML += `
+              <tr>
+                <td>${row.reason || 'Unknown'}</td>
+                <td><strong>${row.count}</strong></td>
+                <td>${pct}%</td>
+              </tr>
+            `;
+          });
+
+          document.getElementById('reasons-stats').innerHTML = `
+            <div class="stat-box" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin-bottom: 10px;">
+              <div>
+                <div class="stat-label">Total Prescriptions</div>
+                <div class="stat-value">${total}</div>
+              </div>
+            </div>
+            <div class="stat-box" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); margin-bottom: 10px;">
+              <div>
+                <div class="stat-label">Unique Reasons</div>
+                <div class="stat-value">${json.data.length}</div>
+              </div>
+            </div>
+            <div class="stat-box" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+              <div>
+                <div class="stat-label">Most Common</div>
+                <div class="stat-value">${json.data[0]?.reason || 'N/A'}</div>
+              </div>
+            </div>
+          `;
+        }
+      } catch (err) {
+        console.error('Error loading reasons:', err);
+      }
+      document.getElementById('loading-reasons').classList.remove('show');
+    }
+
+    // Event listeners
+    document.getElementById('apply-filters').addEventListener('click', () => {
+      currentFilters.state = document.getElementById('filter-state').value;
+      currentFilters.species = document.getElementById('filter-species').value;
+      currentFilters.medicine_id = document.getElementById('filter-medicine').value;
+      loadTabData(document.querySelector('.tab-btn.active').dataset.tab);
+    });
+
+    document.getElementById('refresh-stats').addEventListener('click', async () => {
+      try {
+        await fetch(`${apiBase}?action=refresh_stats&state=${currentFilters.state}`);
+        loadTabData(document.querySelector('.tab-btn.active').dataset.tab);
+        alert('Statistics refreshed!');
+      } catch (err) {
+        console.error('Refresh failed:', err);
+      }
+    });
+
+    // Initial load
+    loadSpecies();
+    loadTabData('high-usage');
+  </script>
+</body>
+</html>

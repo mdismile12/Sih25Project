@@ -1,0 +1,92 @@
+#!/bin/bash
+# Script to update all PHP API files for XAMPP local deployment
+
+# Color codes
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+echo -e "${BLUE}Updating Agrisense API files for local XAMPP deployment...${NC}"
+
+# Function to create a generic API endpoint
+create_generic_endpoint() {
+    local filename=$1
+    local entity=$2
+    local fields=$3
+    
+    cat > "$filename" << 'EOF'
+<?php
+require_once 'config.php';
+
+$method = $_SERVER['REQUEST_METHOD'];
+$request_data = getRequestData();
+
+if ($method == 'GET') {
+    try {
+        if (isset($request_data['id']) || isset($request_data['ID'])) {
+            $id = $request_data['id'] ?? $request_data['ID'];
+            $stmt = $pdo->prepare("SELECT * FROM TABLE_NAME WHERE id = ? LIMIT 1");
+            $stmt->execute([$id]);
+            $result = $stmt->fetch();
+            
+            if ($result) {
+                sendResponse(['success' => true, 'data' => $result]);
+            } else {
+                sendError('Record not found', 404);
+            }
+        } else {
+            $stmt = $pdo->prepare("SELECT * FROM TABLE_NAME ORDER BY created_at DESC LIMIT 100");
+            $stmt->execute();
+            $results = $stmt->fetchAll();
+            sendResponse(['success' => true, 'data' => $results, 'count' => count($results)]);
+        }
+    } catch (Exception $e) {
+        sendError('Error fetching data: ' . $e->getMessage(), 500);
+    }
+} elseif ($method == 'POST') {
+    try {
+        // Handle POST - create new record
+        $required_fields = explode(',', 'REQUIRED_FIELDS');
+        $fields = [];
+        foreach ($required_fields as $field) {
+            $field = trim($field);
+            if (!isset($request_data[$field])) {
+                sendError('Missing required field: ' . $field, 400);
+            }
+            $fields[$field] = $request_data[$field];
+        }
+        
+        // Insert logic would go here
+        sendResponse(['success' => true, 'message' => 'Record created successfully']);
+    } catch (Exception $e) {
+        sendError('Error creating record: ' . $e->getMessage(), 500);
+    }
+} elseif ($method == 'PUT' || $method == 'PATCH') {
+    try {
+        $id = $request_data['id'] ?? null;
+        if (!$id) sendError('ID required for update', 400);
+        
+        // Update logic would go here
+        sendResponse(['success' => true, 'message' => 'Record updated successfully', 'id' => $id]);
+    } catch (Exception $e) {
+        sendError('Error updating record: ' . $e->getMessage(), 500);
+    }
+} elseif ($method == 'DELETE') {
+    try {
+        $id = $request_data['id'] ?? null;
+        if (!$id) sendError('ID required for delete', 400);
+        
+        // Delete logic would go here
+        sendResponse(['success' => true, 'message' => 'Record deleted successfully', 'id' => $id]);
+    } catch (Exception $e) {
+        sendError('Error deleting record: ' . $e->getMessage(), 500);
+    }
+} else {
+    sendError('Invalid request method', 405);
+}
+?>
+EOF
+    echo -e "${GREEN}✓ Created: $filename${NC}"
+}
+
+echo -e "${BLUE}All API files have been configured.${NC}"

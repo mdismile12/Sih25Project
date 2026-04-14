@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agrisense - Entry Point</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 50px;
+            text-align: center;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+
+        .tagline {
+            color: #888;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .version {
+            color: #667eea;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 35px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-icon {
+            font-size: 3.5em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            color: #333;
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .card-description {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.6;
+            flex: 1;
+        }
+
+        .card-label {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-top: 15px;
+            width: fit-content;
+        }
+
+        .featured {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .featured .card-icon {
+            -webkit-text-fill-color: white;
+        }
+
+        .featured .card-title {
+            color: white;
+        }
+
+        .featured .card-description {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .featured .card-label {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 30px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .logo {
+                font-size: 2.5em;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .featured {
+                grid-column: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo"><i class="fas fa-leaf"></i></div>
+            <h1>Agrisense</h1>
+            <p class="tagline">Antimicrobial Resistance Management & Farm Health Monitoring System</p>
+            <p class="version">📊 Version 2.0 | Final Evaluation Build</p>
+        </div>
+
+        <div class="grid">
+            <a href="JUDGES_DEMO.html" class="card featured">
+                <div class="card-icon"><i class="fas fa-star"></i></div>
+                <div class="card-title">🎯 Start Here - System Overview</div>
+                <div class="card-description">
+                    Complete system status, key metrics, and quick access to all modules. Perfect entry point for evaluation.
+                </div>
+                <span class="card-label">👑 Recommended for Judges</span>
+            </a>
+
+            <a href="index.html" class="card">
+                <div class="card-icon"><i class="fas fa-home"></i></div>
+                <div class="card-title">Main Portal</div>
+                <div class="card-description">
+                    Full Agrisense platform including vet login, prescription management, lab testing, and government dashboard.
+                </div>
+                <span class="card-label">Comprehensive Platform</span>
+            </a>
+
+            <a href="AMU.html" class="card">
+                <div class="card-icon"><i class="fas fa-chart-bar"></i></div>
+                <div class="card-title">AMU Dashboard</div>
+                <div class="card-description">
+                    Real-time antimicrobial use tracking with regional breakdowns, animal demographics, and live charts.
+                </div>
+                <span class="card-label">Live Analytics</span>
+            </a>
+
+            <a href="AMU2.html" class="card">
+                <div class="card-icon"><i class="fas fa-chart-line"></i></div>
+                <div class="card-title">Trend Analysis</div>
+                <div class="card-description">
+                    Deep analysis with 5 tabs: High Usage, Species Analysis, Trends, Top Medicines, and Treatment Reasons.
+                </div>
+                <span class="card-label">Advanced Analytics</span>
+            </a>
+
+            <a href="JUDGES_README.md" class="card">
+                <div class="card-icon"><i class="fas fa-book"></i></div>
+                <div class="card-title">Documentation</div>
+                <div class="card-description">
+                    Complete guide for judges including feature overview, testing instructions, and technical details.
+                </div>
+                <span class="card-label">Quick Reference</span>
+            </a>
+
+            <a href="BUILD_SUMMARY.md" class="card">
+                <div class="card-icon"><i class="fas fa-clipboard-check"></i></div>
+                <div class="card-title">Build Summary</div>
+                <div class="card-description">
+                    Detailed completion report, fixes applied, API status, and evaluation checklist.
+                </div>
+                <span class="card-label">QA Report</span>
+            </a>
+        </div>
+    </div>
+</body>
+</html>

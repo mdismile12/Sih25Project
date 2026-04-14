@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Complete API Test Suite</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 8px; margin-bottom: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .header h1 { font-size: 2em; margin-bottom: 5px; }
+        .test-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; }
+        .test-card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 5px solid #667eea; }
+        .test-card h3 { margin-bottom: 10px; color: #333; font-size: 1.1em; }
+        .test-card p { color: #666; font-size: 0.9em; margin-bottom: 15px; }
+        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 0.95em; font-weight: 500; transition: all 0.3s; }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-primary:hover { background: #5568d3; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); }
+        .btn-danger { background: #f56565; color: white; }
+        .btn-danger:hover { background: #e53e3e; }
+        .btn-success { background: #48bb78; color: white; }
+        .btn-success:hover { background: #38a169; }
+        .result { margin-top: 15px; padding: 15px; border-radius: 5px; font-size: 0.85em; font-family: 'Courier New', monospace; max-height: 400px; overflow-y: auto; border: 1px solid #e2e8f0; background: #f7fafc; }
+        .result.success { background: #c6f6d5; border-left: 4px solid #48bb78; }
+        .result.error { background: #fed7d7; border-left: 4px solid #f56565; }
+        .result.info { background: #bee3f8; border-left: 4px solid #4299e1; }
+        .status-badge { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 0.85em; font-weight: 600; margin-top: 10px; }
+        .status-ok { background: #c6f6d5; color: #22543d; }
+        .status-error { background: #fed7d7; color: #742a2a; }
+        .status-pending { background: #bee3f8; color: #2c5282; }
+        .summary { background: white; padding: 20px; border-radius: 8px; margin-top: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .summary h2 { color: #333; margin-bottom: 15px; }
+        .summary-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e2e8f0; }
+        .summary-item:last-child { border-bottom: none; }
+        .summary-status { font-weight: 600; }
+        .test-all-btn { width: 100%; padding: 15px; font-size: 1.1em; margin-bottom: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; }
+        .test-all-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Complete API Test Suite</h1>
+            <p>Comprehensive testing for all Agrisense APIs and database functionality</p>
+        </div>
+
+        <button class="test-all-btn" onclick="runAllTests()">▶️ Run All Tests</button>
+
+        <div class="test-grid">
+            <!-- Test 1: Quick Fix Database -->
+            <div class="test-card">
+                <h3>⚙️ Database Fix</h3>
+                <p>Apply pending database migrations and fixes</p>
+                <button class="btn btn-danger" onclick="testQuickFix()">Apply Fix</button>
+                <div id="result-fix" class="result" style="display:none;"></div>
+            </div>
+
+            <!-- Test 2: Medicines API -->
+            <div class="test-card">
+                <h3>💊 Medicines API</h3>
+                <p>Verify medicines data is accessible</p>
+                <button class="btn btn-primary" onclick="testMedicinesAPI()">Test</button>
+                <div id="result-medicines" class="result" style="display:none;"></div>
+            </div>
+
+            <!-- Test 3: Farms API -->
+            <div class="test-card">
+                <h3>🏡 Farms API</h3>
+                <p>Check farm data availability</p>
+                <button class="btn btn-primary" onclick="testFarmsAPI()">Test</button>
+                <div id="result-farms" class="result" style="display:none;"></div>
+            </div>
+
+            <!-- Test 4: Vets API -->
+            <div class="test-card">
+                <h3>👨‍⚕️ Vets API</h3>
+                <p>Verify veterinarian data</p>
+                <button class="btn btn-primary" onclick="testVetsAPI()">Test</button>
+                <div id="result-vets" class="result" style="display:none;"></div>
+            </div>
+
+            <!-- Test 5: Prescriptions GET -->
+            <div class="test-card">
+                <h3>📋 Get Prescriptions</h3>
+                <p>Retrieve existing prescriptions</p>
+                <button class="btn btn-primary" onclick="testGetPrescriptions()">Test</button>
+                <div id="result-get-prescriptions" class="result" style="display:none;"></div>
+            </div>
+
+            <!-- Test 6: Create Prescription -->
+            <div class="test-card">
+                <h3>✅ Create Prescription</h3>
+                <p>Test full prescription creation</p>
+                <button class="btn btn-success" onclick="testCreatePrescription()">Create</button>
+                <div id="result-create-prescription" class="result" style="display:none;"></div>
+            </div>
+
+            <!-- Test 7: Lab Tests API -->
+            <div class="test-card">
+                <h3>🧪 Lab Tests API</h3>
+                <p>Check lab test data</p>
+                <button class="btn btn-primary" onclick="testLabTestsAPI()">Test</button>
+                <div id="result-lab-tests" class="result" style="display:none;"></div>
+            </div>
+
+            <!-- Test 8: Alerts API -->
+            <div class="test-card">
+                <h3>⚠️ Alerts API</h3>
+                <p>Check system alerts</p>
+                <button class="btn btn-primary" onclick="testAlertsAPI()">Test</button>
+                <div id="result-alerts" class="result" style="display:none;"></div>
+            </div>
+        </div>
+
+        <div class="summary" id="summary" style="display:none;">
+            <h2>📊 Test Summary</h2>
+            <div id="summary-content"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = "http://localhost/update_after_mentoring_1/api";
+        const results = {};
+
+        function showResult(elementId, message, isError = false, isInfo = false) {
+            const el = document.getElementById(elementId);
+            el.style.display = 'block';
+            if (isError) el.className = 'result error';
+            else if (isInfo) el.className = 'result info';
+            else el.className = 'result success';
+            el.innerHTML = `<pre>${typeof message === 'string' ? message : JSON.stringify(message, null, 2)}</pre>`;
+        }
+
+        async function apiTest(name, url, method = 'GET', body = null) {
+            try {
+                const options = { method };
+                if (method === 'POST' && body) {
+                    options.headers = { 'Content-Type': 'application/json' };
+                    options.body = JSON.stringify(body);
+                }
+
+                const response = await fetch(url, options);
+                const text = await response.text();
+                
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    results[name] = { success: false, message: `JSON Parse Error: ${text.substring(0, 100)}` };
+                    return `❌ JSON Parse Error:\n${text.substring(0, 500)}`;
+                }
+
+                if (response.ok) {
+                    results[name] = { success: true, data };
+                    if (Array.isArray(data)) {
+                        return `✅ Success\n\nCount: ${data.length}\n\n${JSON.stringify(data[0] || {}, null, 2)}`;
+                    } else if (data.success) {
+                        return `✅ Success\n\n${JSON.stringify(data, null, 2)}`;
+                    } else {
+                        return `⚠️ Response: ${JSON.stringify(data, null, 2)}`;
+                    }
+                } else {
+                    results[name] = { success: false, message: data };
+                    return `❌ Error (${response.status}):\n${JSON.stringify(data, null, 2)}`;
+                }
+            } catch (error) {
+                results[name] = { success: false, message: error.message };
+                return `❌ Error: ${error.message}`;
+            }
+        }
+
+        async function testQuickFix() {
+            const msg = await apiTest('Database Fix', `${API_BASE_URL}/quick_fix.php`, 'POST');
+            showResult('result-fix', msg, msg.includes('❌'));
+        }
+
+        async function testMedicinesAPI() {
+            const msg = await apiTest('Medicines', `${API_BASE_URL}/medicines.php`);
+            showResult('result-medicines', msg, msg.includes('❌'));
+        }
+
+        async function testFarmsAPI() {
+            const msg = await apiTest('Farms', `${API_BASE_URL}/farms_list.php`);
+            showResult('result-farms', msg, msg.includes('❌'));
+        }
+
+        async function testVetsAPI() {
+            const msg = await apiTest('Vets', `${API_BASE_URL}/vet_login.php`, 'GET');
+            showResult('result-vets', msg, msg.includes('❌'), !msg.includes('❌'));
+        }
+
+        async function testGetPrescriptions() {
+            const msg = await apiTest('Get Prescriptions', `${API_BASE_URL}/prescriptions.php`);
+            showResult('result-get-prescriptions', msg, msg.includes('❌'));
+        }
+
+        async function testCreatePrescription() {
+            const payload = {
+                farm_id: "FARM-001",
+                animal_id: "TEST-" + Math.random().toString(36).substr(2, 9),
+                animal_type: "Cattle",
+                animal_weight: 450,
+                animal_owner: "Test Farmer",
+                symptoms: "Test Symptoms",
+                diagnosis: "Test Diagnosis",
+                vet_id: "VET001",
+                administration_frequency: "2x daily",
+                administration_time: "Morning, Evening",
+                duration_days: 7,
+                medicines: [
+                    {
+                        medicine_id: "MED-001",
+                        dosage_rate: 15,
+                        frequency: "2x daily",
+                        calculated_dosage: 6750,
+                        dosage_unit: "mg",
+                        duration_days: 7
+                    }
+                ],
+                instructions: "Test instructions"
+            };
+
+            const msg = await apiTest('Create Prescription', `${API_BASE_URL}/prescriptions.php`, 'POST', payload);
+            showResult('result-create-prescription', msg, msg.includes('❌'));
+        }
+
+        async function testLabTestsAPI() {
+            const msg = await apiTest('Lab Tests', `${API_BASE_URL}/lab_tests.php`);
+            showResult('result-lab-tests', msg, msg.includes('❌'));
+        }
+
+        async function testAlertsAPI() {
+            const msg = await apiTest('Alerts', `${API_BASE_URL}/alerts.php`);
+            showResult('result-alerts', msg, msg.includes('❌'));
+        }
+
+        async function runAllTests() {
+            results = {};
+            
+            await testQuickFix();
+            await new Promise(r => setTimeout(r, 500));
+            
+            await testMedicinesAPI();
+            await new Promise(r => setTimeout(r, 500));
+            
+            await testFarmsAPI();
+            await new Promise(r => setTimeout(r, 500));
+            
+            await testVetsAPI();
+            await new Promise(r => setTimeout(r, 500));
+            
+            await testGetPrescriptions();
+            await new Promise(r => setTimeout(r, 500));
+            
+            await testCreatePrescription();
+            await new Promise(r => setTimeout(r, 500));
+            
+            await testLabTestsAPI();
+            await new Promise(r => setTimeout(r, 500));
+            
+            await testAlertsAPI();
+            
+            // Show summary
+            showSummary();
+        }
+
+        function showSummary() {
+            const summaryDiv = document.getElementById('summary');
+            const contentDiv = document.getElementById('summary-content');
+            
+            let html = '';
+            let passCount = 0;
+            let failCount = 0;
+
+            for (const [name, result] of Object.entries(results)) {
+                const status = result.success ? 'PASS' : 'FAIL';
+                if (result.success) passCount++;
+                else failCount++;
+                
+                const badgeClass = result.success ? 'status-ok' : 'status-error';
+                const badge = `<span class="status-badge ${badgeClass}">${status}</span>`;
+                
+                html += `
+                    <div class="summary-item">
+                        <span>${name}</span>
+                        <span class="summary-status">${badge}</span>
+                    </div>
+                `;
+            }
+
+            html += `<div class="summary-item" style="border-top: 2px solid #e2e8f0; margin-top: 15px; padding-top: 15px; font-weight: bold;">
+                <span>Total</span>
+                <span>${passCount} passed, ${failCount} failed</span>
+            </div>`;
+
+            contentDiv.innerHTML = html;
+            summaryDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

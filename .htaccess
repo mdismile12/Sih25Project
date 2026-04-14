@@ -1,0 +1,44 @@
+# Apache configuration for Agrisense Portal
+# Enable mod_rewrite for clean URLs
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /update_after_mentoring_1/
+    
+    # Allow direct access to files and directories
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    
+    # IMPORTANT: Exclude api directory from rewriting
+    RewriteCond %{REQUEST_URI} !^/update_after_mentoring_1/api/
+    RewriteCond %{REQUEST_URI} !^/api/
+    
+    # Redirect to index.html for HTML5 History API support (SPA routing)
+    RewriteRule ^(?!api/)(.*)$ index.html [QSA,L]
+</IfModule>
+
+# Set proper MIME types
+<IfModule mod_mime.c>
+    AddType application/json .json
+    AddType text/html .html
+    AddType application/javascript .js
+    AddType text/css .css
+</IfModule>
+
+# Enable gzip compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript
+</IfModule>
+
+# Set default character encoding
+AddDefaultCharset utf-8
+
+# Disable directory listing
+<FilesMatch "^\.">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>

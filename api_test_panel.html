@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Agrisense API Test Panel</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        padding: 30px;
+      }
+
+      h1 {
+        color: #333;
+        margin-bottom: 30px;
+        text-align: center;
+      }
+
+      .test-section {
+        margin-bottom: 30px;
+        padding: 20px;
+        border: 2px solid #eee;
+        border-radius: 8px;
+      }
+
+      .test-section h2 {
+        color: #667eea;
+        margin-bottom: 15px;
+        font-size: 18px;
+      }
+
+      .test-button {
+        background: #667eea;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 5px 5px 5px 0;
+        font-size: 14px;
+        transition: all 0.3s;
+      }
+
+      .test-button:hover {
+        background: #764ba2;
+        transform: translateY(-2px);
+      }
+
+      .test-button.success {
+        background: #10b981;
+      }
+
+      .test-button.error {
+        background: #ef4444;
+      }
+
+      .response {
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 5px;
+        padding: 15px;
+        margin-top: 15px;
+        font-size: 12px;
+        font-family: "Courier New", monospace;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+
+      .success-response {
+        border-left: 4px solid #10b981;
+        color: #065f46;
+        background: #f0fdf4;
+      }
+
+      .error-response {
+        border-left: 4px solid #ef4444;
+        color: #7f1d1d;
+        background: #fef2f2;
+      }
+
+      .status-indicator {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 8px;
+      }
+
+      .status-ok {
+        background: #10b981;
+      }
+
+      .status-error {
+        background: #ef4444;
+      }
+
+      .status-pending {
+        background: #f59e0b;
+      }
+
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #eee;
+      }
+
+      .header-info {
+        display: flex;
+        gap: 30px;
+      }
+
+      .info-item {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .info-label {
+        color: #999;
+        font-size: 12px;
+        text-transform: uppercase;
+      }
+
+      .info-value {
+        color: #333;
+        font-size: 14px;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div>
+          <h1>🔬 Agrisense API Test Panel</h1>
+          <p style="color: #666; text-align: center">
+            Verify that all API endpoints are working correctly
+          </p>
+        </div>
+      </div>
+
+      <div class="header-info">
+        <div class="info-item">
+          <span class="info-label">API Base URL</span>
+          <span class="info-value" id="api-base-url">Loading...</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Status</span>
+          <span class="info-value"
+            ><span class="status-indicator status-pending"></span
+            ><span id="api-status">Checking...</span></span
+          >
+        </div>
+      </div>
+
+      <!-- API Status -->
+      <div class="test-section">
+        <h2>1️⃣ API Health Check</h2>
+        <button class="test-button" onclick="testAPIHealth()">
+          Test API Status
+        </button>
+        <div id="response-health" class="response" style="display: none"></div>
+      </div>
+
+      <!-- Authentication Tests -->
+      <div class="test-section">
+        <h2>2️⃣ Veterinarian Authentication</h2>
+        <button class="test-button" onclick="testVetLogin()">
+          Test Vet Login
+        </button>
+        <button class="test-button" onclick="testVetVerification()">
+          Get Vet Data
+        </button>
+        <div id="response-vet" class="response" style="display: none"></div>
+      </div>
+
+      <!-- Government Tests -->
+      <div class="test-section">
+        <h2>3️⃣ Government Portal</h2>
+        <button class="test-button" onclick="testGovLogin()">
+          Test Gov Login
+        </button>
+        <button class="test-button" onclick="testAlerts()">Get Alerts</button>
+        <div id="response-gov" class="response" style="display: none"></div>
+      </div>
+
+      <!-- Data Retrieval Tests -->
+      <div class="test-section">
+        <h2>4️⃣ Data Retrieval</h2>
+        <button class="test-button" onclick="testFarmDetails()">
+          Get Farm Details
+        </button>
+        <button class="test-button" onclick="testProductInfo()">
+          Get Product Info
+        </button>
+        <button class="test-button" onclick="testBatches()">Get Batches</button>
+        <button class="test-button" onclick="testPolicies()">
+          Get Policies
+        </button>
+        <div id="response-data" class="response" style="display: none"></div>
+      </div>
+
+      <!-- Prescription Tests -->
+      <div class="test-section">
+        <h2>5️⃣ Prescription Management</h2>
+        <button class="test-button" onclick="testCreatePrescription()">
+          Create Prescription
+        </button>
+        <button class="test-button" onclick="testGetPrescriptions()">
+          Get Prescriptions
+        </button>
+        <button class="test-button" onclick="testHealthHistory()">
+          Get Health History
+        </button>
+        <div
+          id="response-prescription"
+          class="response"
+          style="display: none"
+        ></div>
+      </div>
+
+      <!-- Lab Testing -->
+      <div class="test-section">
+        <h2>6️⃣ Lab Testing & MRL</h2>
+        <button class="test-button" onclick="testMRLLabTests()">
+          Get MRL Lab Tests
+        </button>
+        <button class="test-button" onclick="testSafetyAlerts()">
+          Get Safety Alerts
+        </button>
+        <button class="test-button" onclick="testConsultations()">
+          Get Consultations
+        </button>
+        <div id="response-lab" class="response" style="display: none"></div>
+      </div>
+
+      <!-- Audit & Compliance -->
+      <div class="test-section">
+        <h2>7️⃣ Audit & Compliance</h2>
+        <button class="test-button" onclick="testAuditLogs()">
+          Get Audit Logs
+        </button>
+        <button class="test-button" onclick="testFarmAlerts()">
+          Get Farm Alerts
+        </button>
+        <button class="test-button" onclick="testAIAnalysis()">
+          Test AI Analysis
+        </button>
+        <div id="response-audit" class="response" style="display: none"></div>
+      </div>
+
+      <div style="margin-top: 30px; text-align: center; color: #666">
+        <p>✅ All tests completed. Check responses above for details.</p>
+        <p style="margin-top: 15px">
+          <a
+            href="http://localhost/update_after_mentoring_1/"
+            style="color: #667eea; text-decoration: none"
+            >← Back to Agrisense Portal</a
+          >
+        </p>
+      </div>
+    </div>
+
+    <script>
+      const API_BASE_URL = "http://localhost/update_after_mentoring_1/api";
+
+      // Display API Base URL
+      document.getElementById("api-base-url").textContent = API_BASE_URL;
+
+      // Helper function to make API calls
+      async function callAPI(endpoint, method = "GET", data = null) {
+        try {
+          const options = {
+            method,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          };
+
+          if (data && (method === "POST" || method === "PUT")) {
+            options.body = JSON.stringify(data);
+          }
+
+          const response = await fetch(`${API_BASE_URL}/${endpoint}`, options);
+          const responseData = await response.text();
+
+          return {
+            ok: response.ok,
+            status: response.status,
+            data: responseData ? JSON.parse(responseData) : { success: true },
+          };
+        } catch (error) {
+          return {
+            ok: false,
+            status: 0,
+            error: error.message,
+          };
+        }
+      }
+
+      function displayResponse(elementId, response) {
+        const element = document.getElementById(elementId);
+        element.style.display = "block";
+
+        let content = "";
+        if (response.error) {
+          content = `❌ ERROR: ${response.error}`;
+          element.className = "response error-response";
+        } else {
+          const status = response.ok
+            ? "✅ SUCCESS"
+            : `❌ ERROR (${response.status})`;
+          content = status + "\n\n" + JSON.stringify(response.data, null, 2);
+          element.className = response.ok
+            ? "response success-response"
+            : "response error-response";
+        }
+
+        element.textContent = content;
+      }
+
+      // Test functions
+      async function testAPIHealth() {
+        const response = await callAPI("index.php");
+        displayResponse("response-health", response);
+        if (response.ok) {
+          document.getElementById("api-status").textContent = "✅ Online";
+          document.querySelector(".status-pending").className =
+            "status-indicator status-ok";
+        }
+      }
+
+      async function testVetLogin() {
+        const response = await callAPI("vet_login.php", "POST", {
+          vetId: "VET001",
+          password: "demo",
+        });
+        displayResponse("response-vet", response);
+      }
+
+      async function testVetVerification() {
+        const response = await callAPI("vet_verification.php");
+        displayResponse("response-vet", response);
+      }
+
+      async function testGovLogin() {
+        const response = await callAPI("gov_login.php", "POST", {
+          govId: "GOV001",
+          password: "demo",
+          tier: "district",
+          region: "Maharashtra",
+        });
+        displayResponse("response-gov", response);
+      }
+
+      async function testAlerts() {
+        const response = await callAPI("alerts.php");
+        displayResponse("response-gov", response);
+      }
+
+      async function testFarmDetails() {
+        const response = await callAPI("farm_details.php");
+        displayResponse("response-data", response);
+      }
+
+      async function testProductInfo() {
+        const response = await callAPI("product_info.php");
+        displayResponse("response-data", response);
+      }
+
+      async function testBatches() {
+        const response = await callAPI("batches.php");
+        displayResponse("response-data", response);
+      }
+
+      async function testPolicies() {
+        const response = await callAPI("policies.php");
+        displayResponse("response-data", response);
+      }
+
+      async function testCreatePrescription() {
+        const response = await callAPI("prescriptions.php", "POST", {
+          animalId: "COW-TEST-001",
+          animalOwner: "Test Farmer",
+          animalWeight: "500",
+          farmId: "FARM-001",
+          medicines: [
+            {
+              drug: "Oxytetracycline",
+              dosage: "10 mg/kg",
+              reason: "Bacterial infection test",
+            },
+          ],
+          instructions: "Test prescription",
+        });
+        displayResponse("response-prescription", response);
+      }
+
+      async function testGetPrescriptions() {
+        const response = await callAPI("prescriptions.php");
+        displayResponse("response-prescription", response);
+      }
+
+      async function testHealthHistory() {
+        const response = await callAPI("health_history.php");
+        displayResponse("response-prescription", response);
+      }
+
+      async function testMRLLabTests() {
+        const response = await callAPI("mrl_lab_tests.php");
+        displayResponse("response-lab", response);
+      }
+
+      async function testSafetyAlerts() {
+        const response = await callAPI("safety_alerts.php");
+        displayResponse("response-lab", response);
+      }
+
+      async function testConsultations() {
+        const response = await callAPI("consultation_requests.php");
+        displayResponse("response-lab", response);
+      }
+
+      async function testAuditLogs() {
+        const response = await callAPI("audit_logs.php");
+        displayResponse("response-audit", response);
+      }
+
+      async function testFarmAlerts() {
+        const response = await callAPI("farm_alerts.php");
+        displayResponse("response-audit", response);
+      }
+
+      async function testAIAnalysis() {
+        const response = await callAPI("ai_analysis.php", "POST", {
+          animalId: "COW-TEST-001",
+          symptoms: "fever, loss of appetite",
+        });
+        displayResponse("response-audit", response);
+      }
+
+      // Auto-test API health on load
+      window.addEventListener("load", testAPIHealth);
+    </script>
+  </body>
+</html>
